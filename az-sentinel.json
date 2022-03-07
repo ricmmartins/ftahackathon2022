@@ -4,13 +4,14 @@
     "parameters": {
         "workspace": {
             "type": "string",
+            "defaultValue" : "azuresentinel-arm",
             "metadata": {
                 "description": "Name of the Log Analytics workspace your Azure Sentinel connects to"
             }
         },
         "workspaceExists": {
             "type": "string",
-            "defaultValue": "No",
+            "defaultValue": "Yes",
             "allowedValues": [
                 "No",
                 "Yes"
