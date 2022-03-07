@@ -18,7 +18,7 @@
     },
     "DiagnosticsWorkspaceName": {
       "type": "string",
-      "defaultValue": "<WorkspaceName>",
+      "defaultValue": "azuresentinel-arm",
       "metadata": {
         "description": "Provide the workspace name for your Network Diagnostic logs"
       }
