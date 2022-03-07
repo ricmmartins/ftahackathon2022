@@ -2,7 +2,7 @@
 
 * Connect to the Kali VM over RDP on port 33892:
 
-```ssh svradmin@<PublicIPAddressOfAzureFirewall>:33892```
+```ssh svradmin@PublicIPAddressOfAzureFirewall:33892```
 
 ```Password: H@ppytimes123!```
 *  When prompted to choose the setup for the first startup, click to select “Use default config”  
