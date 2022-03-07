@@ -1,4 +1,4 @@
-Commands to run on Kali after the deployment
+## Commands to run on Kali after the ARM deployment
 
 ```
 wget --no-check-certificate https://http.kali.org/kali/pool/main/k/kali-archive-keyring/kali-archive-keyring_2022.1_all.deb
