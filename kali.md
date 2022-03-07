@@ -3,6 +3,7 @@
 * Connect to the Kali VM over RDP on port 33892:
 
 ```ssh svradmin@<PublicIPAddressOfAzureFirewall>:33892```
+
 ```Password: H@ppytimes123!```
 *  When prompted to choose the setup for the first startup, click to select “Use default config”  
 * Create an entry in the HOSTS file (/etc/hosts) on Kali VM to map a name to the Public IP address of the OWASP Juice Shop site published on Application Gateway. Add the linne below at the end of the file:
