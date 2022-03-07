@@ -11,7 +11,7 @@
         },
         "workspaceExists": {
             "type": "string",
-            "defaultValue": "Yes",
+            "defaultValue": "No",
             "allowedValues": [
                 "No",
                 "Yes"
