@@ -1,5 +1,5 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
     "DefaultUserName": {
@@ -93,12 +93,9 @@
     "FW-name": "SOC-NS-FW",
     "firewallPolicyName": "SOC-NS-FWPolicy",
     "AppGatewayPolicyName": "SOC-NS-AGPolicy",
-    "FrontdoorPolicyName": "SOCNSFDPolicy",
     "AG-Name": "SOC-NS-AG-WAFv2",
     "AppGateway_IPAddress": "10.0.25.70",
     "applicationGatewayId": "[resourceId('Microsoft.Network/applicationGateways', variables('AG-Name'))]",
-    "FrontDoorName": "[concat('Demowasp','-', uniqueString(resourceGroup().id))]",
-    "RT-Name1": "SOC-NS-DEFAULT-ROUTE",
     "NSG-Name1": "SOC-NS-NSG-SPOKE1",
     "NSG-Name2": "SOC-NS-NSG-SPOKE2",
     "Site-Name1": "[concat('owaspdirect','-', uniqueString(resourceGroup().id))]",
@@ -191,7 +188,6 @@
       "location": "[resourceGroup().location]",
       "apiVersion": "2020-03-01",
       "dependsOn": [
-        "[resourceId('Microsoft.Network/routeTables', variables('RT-Name1'))]",
         "[resourceId('Microsoft.Network/networkSecurityGroups', variables('NSG-Name1'))]"
       ],
       "tags": {
@@ -211,9 +207,7 @@
               "networkSecurityGroup": {
                 "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('NSG-Name1'))]"
               },
-              "routeTable": {
-                "id": "[resourceId('Microsoft.Network/routeTables', variables('RT-Name1'))]"
-              },
+              
               "serviceEndpoints": "[variables('Subnet_serviceEndpoints')]",
               "privateEndpointNetworkPolicies": "Enabled",
               "privateLinkServiceNetworkPolicies": "Enabled"
@@ -226,9 +220,7 @@
               "networkSecurityGroup": {
                 "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('NSG-Name1'))]"
               },
-              "routeTable": {
-                "id": "[resourceId('Microsoft.Network/routeTables', variables('RT-Name1'))]"
-              },
+              
               "serviceEndpoints": "[variables('Subnet_serviceEndpoints')]",
               "privateEndpointNetworkPolicies": "Enabled",
               "privateLinkServiceNetworkPolicies": "Enabled"
@@ -261,7 +253,6 @@
       "location": "[resourceGroup().location]",
       "apiVersion": "2020-03-01",
       "dependsOn": [
-        "[resourceId('Microsoft.Network/routeTables', variables('RT-Name1'))]",
         "[resourceId('Microsoft.Network/networkSecurityGroups', variables('NSG-Name2'))]"
       ],
       "tags": {
@@ -281,9 +272,6 @@
               "networkSecurityGroup": {
                 "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('NSG-Name2'))]"
               },
-              "routeTable": {
-                "id": "[resourceId('Microsoft.Network/routeTables', variables('RT-Name1'))]"
-              },
               "serviceEndpoints": "[variables('Subnet_serviceEndpoints')]",
               "privateEndpointNetworkPolicies": "Enabled",
               "privateLinkServiceNetworkPolicies": "Enabled"
@@ -295,9 +283,6 @@
               "addressPrefix": "[variables('VN-Name3Subnet2Prefix')]",
               "networkSecurityGroup": {
                 "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('NSG-Name2'))]"
-              },
-              "routeTable": {
-                "id": "[resourceId('Microsoft.Network/routeTables', variables('RT-Name1'))]"
               },
               "serviceEndpoints": "[variables('Subnet_serviceEndpoints')]",
               "privateEndpointNetworkPolicies": "Enabled",
@@ -1178,238 +1163,6 @@
             }
           ]
         }
-      }
-    },
-    {
-      "type": "Microsoft.Network/frontdoors",
-      "apiVersion": "2019-04-01",
-      "dependsOn": [ "[concat(resourceGroup().id, '/providers/Microsoft.Network/FrontDoorWebApplicationFirewallPolicies/',variables('FrontDoorPolicyName'))]" ],
-      "name": "[variables('FrontDoorName')]",
-      "location": "global",
-      "tags": {},
-      "properties": {
-        "friendlyName": "[variables('FrontDoorName')]",
-        "enabledState": "Enabled",
-        "healthProbeSettings": [
-          {
-            "name": "healthProbeSettings1",
-            "properties": {
-              "path": "/",
-              "protocol": "Http",
-              "intervalInSeconds": 30
-            }
-          }
-        ],
-        "loadBalancingSettings": [
-          {
-            "name": "loadBalancingSettings1",
-            "properties": {
-              "sampleSize": 4,
-              "successfulSamplesRequired": 2
-            }
-          }
-        ],
-        "frontendEndpoints": [
-          {
-            "id": "[concat(resourceId('Microsoft.Network/frontdoors', variables('FrontDoorName')), concat('/FrontendEndpoints/', variables('FrontDoorName'), '-azurefd-net'))]",
-            "name": "[concat(variables('FrontDoorName'), '-azurefd-net')]",
-            "properties": {
-              "hostName": "[concat(variables('FrontDoorName'), '.azurefd.net')]",
-              "sessionAffinityEnabledState": "Disabled",
-              "sessionAffinityTtlSeconds": 0,
-              "webApplicationFirewallPolicyLink": {
-                "id": "[concat(resourceGroup().id, '/providers/Microsoft.Network/FrontDoorWebApplicationFirewallPolicies/',variables('FrontDoorPolicyName'))]"
-              },
-              "resourceState": "Enabled"
-            }
-          }
-        ],
-        "backendPools": [
-          {
-            "name": "OWASP",
-            "properties": {
-              "backends": [
-                {
-                  "address": "[reference(resourceId('Microsoft.Network/publicIPAddresses',variables('publicIpAddressName2'))).IpAddress]",
-                  "enabledState": "Enabled",
-                  "httpPort": 80,
-                  "httpsPort": 443,
-                  "priority": 1,
-                  "weight": 50,
-                  "backendHostHeader": "[reference(resourceId('Microsoft.Network/publicIPAddresses',variables('publicIpAddressName2'))).IpAddress]"
-                }
-              ],
-              "loadBalancingSettings": {
-                "id": "[resourceId('Microsoft.Network/frontDoors/loadBalancingSettings', variables('FrontDoorName'), 'loadBalancingSettings1')]"
-              },
-              "healthProbeSettings": {
-                "id": "[resourceId('Microsoft.Network/frontDoors/healthProbeSettings', variables('FrontDoorName'), 'healthProbeSettings1')]"
-              }
-            }
-          }
-        ],
-        "routingRules": [
-          {
-            "name": "AppGW",
-            "properties": {
-              "frontendEndpoints": [
-                {
-                  "id": "[concat(resourceId('Microsoft.Network/frontdoors', variables('frontdoorname')), concat('/frontendEndpoints/', variables('frontdoorname'), '-azurefd-net'))]"
-                }
-              ],
-              "acceptedProtocols": [
-                "Http",
-                "Https"
-              ],
-              "patternsToMatch": [
-                "/*"
-              ],
-              "enabledState": "Enabled",
-              "routeConfiguration": {
-                "@odata.type": "#Microsoft.Azure.FrontDoor.Models.FrontdoorForwardingConfiguration",
-                "forwardingProtocol": "HttpOnly",
-                "backendPool": {
-                  "id": "[resourceId('Microsoft.Network/frontDoors/backendPools', variables('FrontDoorName'), 'OWASP')]"
-                }
-              }
-            }
-          }
-        ]
-      }
-    },
-    {
-      "type": "Microsoft.Network/frontdoorwebapplicationfirewallpolicies",
-      "apiVersion": "2019-10-01",
-      "name": "[variables('FrontdoorPolicyName')]",
-      "location": "Global",
-      "properties": {
-        "policySettings": {
-                    "enabledState": "Enabled",
-                    "mode": "Prevention",
-                    "redirectUrl": "https://www.microsoft.com/en-us/edge",
-                    "customBlockResponseStatusCode": 403,
-                    "customBlockResponseBody": "QmxvY2tlZCBieSBmcm9udCBkb29yIFdBRg=="
-        },
-        "customRules": {
-          "rules": [
-            {
-              "name": "BlockGeoLocationChina",
-              "enabledState": "Enabled",
-              "priority": 10,
-              "ruleType": "MatchRule",
-              "rateLimitDurationInMinutes": 1,
-              "rateLimitThreshold": 100,
-              "matchConditions": [
-                {
-                  "matchVariable": "RemoteAddr",
-                  "operator": "GeoMatch",
-                  "negateCondition": false,
-                  "matchValue": [
-                    "CN"
-                  ],
-                  "transforms": []
-                }
-              ],
-              "action": "Block"
-            },
-            {
-              "name": "RedirectInternetExplorerUserAgent",
-              "enabledState": "Enabled",
-              "priority": 20,
-              "ruleType": "MatchRule",
-              "rateLimitDurationInMinutes": 1,
-              "rateLimitThreshold": 100,
-              "matchConditions": [
-                {
-                  "matchVariable": "RequestHeader",
-                  "selector": "User-Agent",
-                  "operator": "Contains",
-                  "negateCondition": false,
-                  "matchValue": [
-                    "rv:11.0"
-                  ],
-                  "transforms": []
-                }
-              ],
-              "action": "Redirect"
-            },
-            {
-              "name": "RateLimitRequest",
-              "enabledState": "Enabled",
-              "priority": 30,
-              "ruleType": "RateLimitRule",
-              "rateLimitDurationInMinutes": 1,
-              "rateLimitThreshold": 1,
-              "matchConditions": [
-                {
-                  "matchVariable": "RequestUri",
-                  "operator": "Contains",
-                  "negateCondition": false,
-                  "matchValue": [
-                    "search"
-                  ],
-                  "transforms": []
-                }
-              ],
-              "action": "Block"
-            }
-          ]
-        },
-        "managedRules": {
-          "managedRuleSets": [
-            {
-              "ruleSetType": "DefaultRuleSet",
-              "ruleSetVersion": "1.0"
-
-            },
-            {
-              "ruleSetType": "BotProtection",
-              "ruleSetVersion": "preview-0.1"
-            }
-          ]
-        }
-      }
-    },
-    {
-      "type": "Microsoft.Network/frontdoors/providers/diagnosticSettings",
-      "name": "[concat(variables('FrontDoorName'),'/microsoft.insights/', 'FrontDoorDiagnostics')]",
-      "apiVersion": "2017-05-01-preview",
-      "dependsOn": [
-        "[resourceId('Microsoft.Network/frontdoors', variables('FrontDoorName'))]"
-      ],
-      "properties": {
-        "name": "DiagService",
-        "workspaceId": "[variables('workspaceId')]",
-        "logs": [
-          {
-            "category": "FrontdoorAccessLog",
-            "enabled": true
-          },
-          {
-            "category": "FrontdoorWebApplicationFirewallLog",
-            "enabled": true
-          }
-        ]
-      }
-    },
-    {
-      "type": "Microsoft.Network/routeTables",
-      "apiVersion": "2019-02-01",
-      "name": "[variables('RT-Name1')]",
-      "location": "[resourceGroup().location]",
-      "dependsOn": [],
-      "properties": {
-        "disableBgpRoutePropagation": false,
-        "routes": [
-          {
-            "name": "DefaultRoute",
-            "properties": {
-              "addressPrefix": "0.0.0.0/0",
-              "nextHopType": "VirtualAppliance",
-              "nextHopIpAddress": "10.0.25.4"
-            }
-          }
-        ]
       }
     },
     {
