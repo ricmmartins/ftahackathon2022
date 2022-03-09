@@ -1,4 +1,4 @@
-# FTA Hackathon 2022
+# Instructions to setup the environment
 
 1. Go to Azure Portal, search by "Deploy a custom template" 
 2. Select template > Build your own template in the editor
